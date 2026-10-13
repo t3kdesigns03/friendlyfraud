@@ -21,3 +21,9 @@ export async function saveDkpSettings(s: DkpSettings) {
     [JSON.stringify(s)],
   );
 }
+
+/** True while the placeholder guild (src/lib/demo/seed.ts) is what's in the database. */
+export async function isSampleData(): Promise<boolean> {
+  const row = await one<{ value: boolean }>(`select value from guild_settings where key = 'sample_data'`);
+  return row?.value === true;
+}

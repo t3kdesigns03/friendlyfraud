@@ -2,13 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { GUILD_NAME, GUILD_TAGLINE } from "@/config/guild";
 import { isWriter } from "@/lib/auth";
+import { isSampleData } from "@/lib/data/settings";
 import { logoutAction } from "@/lib/actions/misc";
 import { DesktopNav, MobileNav } from "@/components/nav";
 import { IconLock, IconSettings, IconUnlock } from "@/components/icons";
 import { Credit } from "@/components/credit";
 
 export default async function SiteLayout({ children }: LayoutProps<"/">) {
-  const writer = await isWriter();
+  const [writer, sample] = await Promise.all([isWriter(), isSampleData()]);
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-line/70 bg-bg/75 backdrop-blur-md" data-solid>
@@ -40,6 +41,11 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
           </div>
         </div>
       </header>
+      {sample && (
+        <div className="relative z-30 border-b border-void/25 bg-void/10 px-4 py-1.5 text-center text-[11px] tracking-wide text-void-bright" data-solid>
+          Sample data — the roster, calendar, loot and progression are placeholders until the real database goes in.
+        </div>
+      )}
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-10 sm:px-6 sm:pt-10">{children}</main>
 

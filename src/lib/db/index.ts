@@ -1,5 +1,6 @@
 import "server-only";
 import { applyMigrations, MIGRATION_LOCK } from "./migrate";
+import { demoSeedEnabled, seedDemo } from "@/lib/demo/seed";
 
 // One tiny SQL interface over two drivers:
 //  - DATABASE_URL set   → Supabase Postgres via postgres.js (production / Netlify)
@@ -68,6 +69,10 @@ async function connectPostgres(url: string): Promise<Db> {
       );
     });
   }
+  // Placeholder guild only if explicitly asked for (DEMO_DATA=1) and the DB is empty.
+  if (demoSeedEnabled()) {
+    await sql.begin((t) => seedDemo(wrap(t), (m) => console.log(`[db] ${m}`)));
+  }
   return {
     mode: "supabase",
     ...wrap(sql),
@@ -106,6 +111,10 @@ async function connectLocal(): Promise<Db> {
       return (await s.query<T>(text, params)).rows;
     },
   });
+  // Placeholder guild for the bones deploy (empty temporary DB only).
+  if (demoSeedEnabled()) {
+    await pg.transaction((t) => seedDemo(wrap(t), (m) => console.log(`[db] ${m}`)));
+  }
   // PGlite is single-connection; serialize transactions so they don't interleave.
   let chain: Promise<unknown> = Promise.resolve();
   return {

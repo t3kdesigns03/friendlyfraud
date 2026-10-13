@@ -10,7 +10,7 @@ export const NAV = [
   { href: "/events", label: "Calendar", icon: IconCalendar },
   { href: "/loot", label: "Loot", icon: IconGem },
   { href: "/progression", label: "Progress", icon: IconSkull },
-  { href: "/explore", label: "Explore", icon: IconFeather },
+  { href: "/explore", label: "YERRRP", icon: IconFeather },
 ] as const;
 
 function isActive(pathname: string, href: string) {
@@ -33,7 +33,7 @@ export function DesktopNav() {
               className="ml-2 flex items-center gap-2 rounded-full border border-void/40 bg-void/10 px-3.5 py-1.5 text-xs font-semibold tracking-[0.16em] text-void-bright uppercase transition-colors hover:border-void hover:text-ink"
             >
               <span className="size-1.5 rounded-full bg-void-bright shadow-[0_0_8px_var(--void)]" />
-              Explore
+              YERRRP
             </Link>
           );
         }
