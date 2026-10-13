@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CLASSES, RACES, REGION_LABELS, ROLE_LABELS, type Region } from "@/config/guild";
+import { CLASSES, FEATURES, RACES, REGION_LABELS, ROLE_LABELS, type Region } from "@/config/guild";
 import type { CharacterWithStats } from "@/lib/data/roster";
 import { characterPath, displayName } from "@/lib/identity";
 import { ROLE_ICONS } from "./icons";
@@ -48,9 +48,11 @@ export function CharacterCard({ c }: { c: CharacterWithStats }) {
           <span title="Attendance">
             <span className="text-ink">{c.attendancePct === null ? "—" : `${c.attendancePct}%`}</span> att
           </span>
-          <span title="DKP">
-            <span className="text-gold-bright">{c.dkp}</span> dkp
-          </span>
+          {FEATURES.loot && (
+            <span title="DKP">
+              <span className="text-gold-bright">{c.dkp}</span> dkp
+            </span>
+          )}
         </span>
       </div>
     </Link>

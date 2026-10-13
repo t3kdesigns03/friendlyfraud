@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { EVENT_KIND_LABELS, ROLE_LABELS, ROLES, type Role } from "@/config/guild";
+import { EVENT_KIND_LABELS, FEATURES, ROLE_LABELS, ROLES, type Role } from "@/config/guild";
 import { isWriter } from "@/lib/auth";
 import { getEvent, listSignups, type Signup } from "@/lib/data/events";
 import { characterOptions } from "@/lib/data/roster";
@@ -120,7 +120,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/ev
         {event.description && <p className="mt-4 max-w-2xl text-sm whitespace-pre-line text-ink-dim">{event.description}</p>}
         {saved === "attendance" && (
           <p className="mt-4 rounded-lg border border-yes/30 bg-yes/10 px-3 py-2 text-sm text-yes">
-            Attendance saved and DKP awarded.
+            {FEATURES.loot ? "Attendance saved and DKP awarded." : "Attendance saved."}
           </p>
         )}
       </header>
@@ -151,7 +151,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/ev
         <section>
           <SectionTitle>{ended ? "Signups closed" : "Sign up"}</SectionTitle>
           {ended ? (
-            <p className="card p-4 text-sm text-ink-dim">This event has ended.{writer && attendance.size === 0 ? " Take attendance to award DKP." : ""}</p>
+            <p className="card p-4 text-sm text-ink-dim">This event has ended.{writer && attendance.size === 0 ? (FEATURES.loot ? " Take attendance to award DKP." : " Take attendance for the record.") : ""}</p>
           ) : writer ? (
             <div className="card p-4">
               <SignupForm eventId={id} characters={eligibleChars} existing={existing} />

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { GUILD_NAME, GUILD_TIMEZONE, RULESET_LABELS, RULESETS } from "@/config/guild";
+import { FEATURES, GUILD_NAME, GUILD_TIMEZONE, RULESET_LABELS, RULESETS } from "@/config/guild";
 import { isWriter } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getDkpSettings } from "@/lib/data/settings";
@@ -28,6 +28,7 @@ export default async function SettingsPage() {
     <div className="mx-auto max-w-3xl">
       <PageHeader eyebrow="Officers" title="Settings" />
 
+      {FEATURES.loot && (
       <section className="mb-10">
         <SectionTitle>DKP</SectionTitle>
         <ActionForm action={saveDkpSettingsAction} className="card grid gap-4 p-5 sm:grid-cols-3">
@@ -57,6 +58,7 @@ export default async function SettingsPage() {
           </div>
         </ActionForm>
       </section>
+      )}
 
       <section className="mb-10">
         <SectionTitle>Blizzard API</SectionTitle>

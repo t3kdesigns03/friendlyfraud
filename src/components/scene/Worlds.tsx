@@ -33,6 +33,14 @@ export const pointerHandlers = (id: string, onClick?: () => void) => ({
   onClick: (e: ThreeEvent<MouseEvent>) => {
     if (overUI(e)) return;
     e.stopPropagation();
+    // touch has no hover: the first tap flares the label, the second acts
+    const touch = (e.nativeEvent as PointerEvent).pointerType === "touch" || (e.nativeEvent as PointerEvent).pointerType === "pen";
+    if (touch && raw.armed !== id) {
+      sceneStore.set("armed", id);
+      sceneStore.setHovered(id);
+      return;
+    }
+    sceneStore.set("armed", null);
     if (onClick) onClick();
     else sceneStore.setActive(id);
   },

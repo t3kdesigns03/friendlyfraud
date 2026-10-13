@@ -2,7 +2,13 @@
 export const GUILD_NAME = "Friendly Fraud";
 
 // Times on the calendar are entered and shown in this zone ("guild time").
-export const GUILD_TIMEZONE = "America/New_York";
+export const GUILD_TIMEZONE = "America/Chicago";
+
+// Feature switches. Loot/DKP stays in the code and database but is hidden
+// from the site until the guild turns it on.
+export const FEATURES = {
+  loot: false,
+};
 
 // Default region for new characters.
 export const DEFAULT_REGION: Region = "us";

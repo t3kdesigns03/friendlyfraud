@@ -43,7 +43,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       </header>
       {sample && (
         <div className="relative z-30 border-b border-void/25 bg-void/10 px-4 py-1.5 text-center text-[11px] tracking-wide text-void-bright" data-solid>
-          Sample data — the roster, calendar, loot and progression are placeholders until the real database goes in.
+          Sample data — the roster, calendar and progression are placeholders until the real database goes in.
         </div>
       )}
 

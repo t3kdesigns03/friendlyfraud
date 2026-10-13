@@ -4,7 +4,7 @@ import { GalaxyExperience } from "@/components/galaxy/GalaxyExperience";
 
 export const metadata: Metadata = {
   title: "YERRRP",
-  description: "Outer space, WoW: Forever style. Fly the void-raven between the guild's worlds.",
+  description: "Outer space, WoW: Forever style. Ride a gryphon between the guild's worlds.",
 };
 
 export default async function ExplorePage() {

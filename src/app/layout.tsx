@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   // Netlify provides URL (production) / DEPLOY_PRIME_URL (previews) at build and runtime.
   metadataBase: new URL(process.env.URL ?? process.env.DEPLOY_PRIME_URL ?? "http://localhost:3000"),
   title: { default: GUILD_NAME, template: `%s · ${GUILD_NAME}` },
-  description: `${GUILD_NAME} — ${GUILD_TAGLINE}. Roster, raid calendar, loot and progression.`,
+  description: `${GUILD_NAME} — ${GUILD_TAGLINE}. Roster, raid calendar and progression.`,
 };
 
 export const viewport: Viewport = {

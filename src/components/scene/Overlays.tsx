@@ -28,10 +28,11 @@ export function HoverLabel() {
   const hovered = useScene((s) => s.hovered);
   const active = useScene((s) => s.active);
   const data = useScene((s) => s.data);
+  const armed = useScene((s) => s.armed);
   const hit = lookup(active ? null : hovered, data);
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-30 hidden overflow-hidden md:block">
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-30 overflow-hidden">
       <div
         ref={(el) => {
           labelHost.el = el;
@@ -53,7 +54,7 @@ export function HoverLabel() {
                   )}
                 </div>
                 <p className="mt-1 text-[11px] text-ink-dim">
-                  {hit.raid?.next ? `Next: ${hit.raid.next.when}` : hit.world.tagline}
+                  {armed === hit.world.id ? "Tap again to fly" : hit.raid?.next ? `Next: ${hit.raid.next.when}` : hit.world.tagline}
                 </p>
               </>
             )}
@@ -91,7 +92,9 @@ export function WorldPanel() {
   const data = useScene((s) => s.data);
   const hit = lookup(active, data);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const open = hit?.kind === "world";
+  const arrived = useScene((s) => s.arrived);
+  // the panel slides in once the camera has flown there
+  const open = hit?.kind === "world" && arrived;
 
   useEffect(() => {
     if (!open) return;

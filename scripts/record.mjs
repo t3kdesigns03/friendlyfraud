@@ -68,10 +68,11 @@ const send = (method, params = {}) =>
   });
 const evaluate = async (expression) => (await send("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true })).result?.result?.value;
 const center = (sel) =>
-  evaluate(`(() => { const el = document.querySelector(${JSON.stringify(sel)}); if (!el) return null; const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width }; })()`);
+  evaluate(`(() => { const el = document.querySelector(${JSON.stringify(sel)}); if (!el) return null; const b = el.getBoundingClientRect(); if (b.bottom > innerHeight || b.top < 0) el.scrollIntoView({ block: "center", behavior: "instant" }); const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width }; })()`);
 
 await send("Runtime.enable");
 await send("Page.enable");
+if (process.env.REDUCED) await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
 await send("Emulation.setDeviceMetricsOverride", { width: W, height: H, deviceScaleFactor: 1, mobile: touch });
 await send("Emulation.setTouchEmulationEnabled", { enabled: touch, maxTouchPoints: touch ? 5 : 0 });
 await send("Page.navigate", { url });
@@ -99,6 +100,12 @@ for (const s of steps) {
         await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: c.x, y: c.y, button: "left", clickCount: 1 });
       }
     }
+  }
+  if (s.tapAt) {
+    const [x, y] = s.tapAt;
+    console.log(`  tapAt ${x},${y}`);
+    await send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+    await send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
   }
   if (s.text) console.log(`  text(${s.text}): ${JSON.stringify((await evaluate(`document.querySelector(${JSON.stringify(s.text)})?.innerText ?? null`))?.slice(0, 600))}`);
   if (s.shot) {

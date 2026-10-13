@@ -22,6 +22,12 @@ export type SceneState = {
   interacted: boolean;
   /** /explore: roster light picked for the info card */
   picked: string | null;
+  /** reduced motion is on: the static crest shows, with a button to opt in */
+  canOptIn: boolean;
+  /** touch: first tap arms a world (label shows), second tap flies */
+  armed: string | null;
+  /** homepage: the camera has finished flying to the active world */
+  arrived: boolean;
 };
 
 const state: SceneState = {
@@ -32,6 +38,9 @@ const state: SceneState = {
   ready: false,
   interacted: false,
   picked: null,
+  canOptIn: false,
+  armed: null,
+  arrived: false,
 };
 
 let snapshot: SceneState = { ...state };
@@ -69,6 +78,11 @@ export const sceneStore = {
   setReady(ready: boolean) {
     if (state.ready === ready) return;
     state.ready = ready;
+    commit();
+  },
+  set<K extends "canOptIn" | "armed" | "arrived">(key: K, value: SceneState[K]) {
+    if (state[key] === value) return;
+    state[key] = value;
     commit();
   },
   setInteracted() {

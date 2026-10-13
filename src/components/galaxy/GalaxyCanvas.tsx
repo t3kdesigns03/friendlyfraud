@@ -11,7 +11,7 @@ import { Nebulae, type Cloud } from "../scene/Nebulae";
 import { Embers, Starfield, Vortex } from "../scene/Particles";
 import { AdaptivePerf, Env, Ready } from "../scene/SceneCanvas";
 import { TIERS, detectTier, type Tier } from "../scene/perf";
-import { GalaxyRig, MarkerTracker, VoidRaven } from "./Flight";
+import { GalaxyRig, MarkerTracker, MountFlight } from "./Flight";
 import { Corona, GalaxyWorlds } from "./GalaxyWorld";
 import { galaxyScale } from "./layout";
 
@@ -90,7 +90,7 @@ export default function GalaxyCanvas({ small, calm, onReady, onOpenCharacter }: 
         <Crest shards={cfg.shards} frozen={false} />
         <Motes frozen={false} onOpen={onOpenCharacter} />
         <GalaxyWorlds segments={cfg.worldSegments} />
-        <VoidRaven small={small} calm={calm} />
+        <MountFlight small={small} calm={calm} />
         <GalaxyRig small={small} calm={calm} />
         <MarkerTracker />
         <Ready onReady={onReady} />

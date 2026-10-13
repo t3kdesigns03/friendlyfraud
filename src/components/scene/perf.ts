@@ -57,3 +57,25 @@ export function hasWebGL(): boolean {
 export function prefersReducedMotion() {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
+
+// Reduced motion is respected by default, but anyone can opt in to the
+// cinematic (remembered per browser) — some people turn OS animations off
+// globally and still want to see the 3D here.
+const MOTION_KEY = "ff-motion";
+export function motionOptedIn() {
+  try {
+    return localStorage.getItem(MOTION_KEY) === "on";
+  } catch {
+    return false;
+  }
+}
+export function optInToMotion() {
+  try {
+    localStorage.setItem(MOTION_KEY, "on");
+  } catch {}
+  window.dispatchEvent(new Event("ff-motion-on"));
+}
+/** Show the static crest instead of 3D. */
+export function staticOnly() {
+  return prefersReducedMotion() && !motionOptedIn();
+}

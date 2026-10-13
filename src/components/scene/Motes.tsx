@@ -8,6 +8,7 @@ import { livePositions, raw, useScene } from "@/lib/scene/store";
 import type { SceneCharacter } from "@/lib/scene/types";
 import { labelHost } from "./labelHost";
 import { pointerHandlers } from "./Worlds";
+import { isSmallScreen } from "./perf";
 
 const TAU = Math.PI * 2;
 
@@ -58,6 +59,7 @@ function Mote({
   }, [c.id, index, total]);
   const color = useMemo(() => new THREE.Color(c.color), [c.color]);
   const size = c.isMain ? 0.14 : 0.1;
+  const hitRadius = useMemo(() => (isSmallScreen() ? 0.95 : 0.45), []);
 
   useFrame((state, dt) => {
     const t = frozen ? 0 : state.clock.elapsedTime;
@@ -90,7 +92,8 @@ function Mote({
         <spriteMaterial map={sprite} color={color} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} />
       </sprite>
       <mesh {...pointerHandlers(id, () => onOpen(c.path, id))}>
-        <sphereGeometry args={[0.45, 8, 6]} />
+        {/* phones get a fatter target so a fingertip can hit it */}
+        <sphereGeometry args={[hitRadius, 8, 6]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} colorWrite={false} />
       </mesh>
     </group>
@@ -136,8 +139,10 @@ export function LabelTracker() {
     v.y += lift;
     v.project(camera);
     if (v.z > 1) return;
-    const x = (v.x * 0.5 + 0.5) * size.width;
-    const y = (-v.y * 0.5 + 0.5) * size.height;
+    // keep the whole label on screen (phones put worlds near the edges)
+    const half = ((el.firstElementChild as HTMLElement | null)?.offsetWidth ?? 160) / 2;
+    const x = Math.min(size.width - half - 8, Math.max(half + 8, (v.x * 0.5 + 0.5) * size.width));
+    const y = Math.max(64, (-v.y * 0.5 + 0.5) * size.height);
     el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%)`;
   });
   return null;

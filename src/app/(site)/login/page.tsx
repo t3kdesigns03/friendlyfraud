@@ -16,7 +16,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       <h1 className="display text-3xl text-ink">Enter the passcode</h1>
       <p className="mt-2 text-sm text-ink-dim">
         Everything on {GUILD_NAME}&apos;s site is public to read. The shared passcode unlocks signups, roster edits,
-        attendance and loot.
+        and attendance.
       </p>
       <ActionForm action={loginAction} className="card mt-6 flex flex-col gap-4 p-5">
         <input type="hidden" name="next" value={nextPath} />

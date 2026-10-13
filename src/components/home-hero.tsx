@@ -5,6 +5,7 @@ import Link from "next/link";
 import { GUILD_NAME, GUILD_TAGLINE } from "@/config/guild";
 import { useScene } from "@/lib/scene/store";
 import { stageHost } from "./scene/labelHost";
+import { optInToMotion } from "./scene/perf";
 import { IconFeather } from "./icons";
 
 /**
@@ -15,6 +16,7 @@ import { IconFeather } from "./icons";
  */
 export function HomeHero({ countdowns }: { countdowns: { label: string; days: number; date: string }[] }) {
   const ready = useScene((s) => s.ready);
+  const canOptIn = useScene((s) => s.canOptIn);
   const [first, ...rest] = GUILD_NAME.split(" ");
 
   return (
@@ -26,7 +28,7 @@ export function HomeHero({ countdowns }: { countdowns: { label: string; days: nu
         </h1>
         <div className="seam mt-4 max-w-sm sm:mt-6" />
         <p className="mt-3 max-w-md text-sm leading-relaxed text-ink-dim sm:mt-5 sm:text-[15px]">
-          Barrow Deeps, Hyjal Summit and Onyxia&apos;s Lair open December 9. Sign up, show up, split the loot.
+          Barrow Deeps, Hyjal Summit and Onyxia&apos;s Lair open December 9. Sign up, show up, clear the raid.
         </p>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-5 sm:flex sm:flex-wrap sm:gap-2.5">
           {countdowns.map((c) => (
@@ -60,7 +62,6 @@ export function HomeHero({ countdowns }: { countdowns: { label: string; days: nu
         ref={(el) => {
           stageHost.el = el;
         }}
-        aria-hidden
         className="relative mt-1 h-[min(94vw,30rem)] w-full sm:h-[30rem] lg:mt-0 lg:h-[min(76svh,46rem)]"
       >
         <div
@@ -78,6 +79,15 @@ export function HomeHero({ countdowns }: { countdowns: { label: string; days: nu
             className="h-[94%] w-auto max-w-full object-contain drop-shadow-[0_0_40px_rgb(140_85_255_/_0.25)]"
           />
         </div>
+        {canOptIn && (
+          <button
+            type="button"
+            onClick={optInToMotion}
+            className="glass absolute bottom-3 left-1/2 flex min-h-11 -translate-x-1/2 items-center gap-2 rounded-full px-4 text-xs font-semibold tracking-wide text-void-bright"
+          >
+            <span className="size-1.5 rounded-full bg-void-bright shadow-[0_0_8px_var(--void)]" /> Play the cinematic
+          </button>
+        )}
       </div>
       <p className="col-span-full -mt-2 text-center text-[10px] tracking-[0.3em] text-muted uppercase lg:mt-0">
         Scroll into the sky

@@ -31,14 +31,14 @@ const CHARS: Char[] = [
   ["Dorn", "Blackpowder", "hunter", "dwarf", "dps", false, "planned", "Recruit", "pvp"],
 ];
 
-// Times are UTC; 01:00Z is 8 PM Eastern in Nov/Dec, 00:00Z is 8 PM Eastern in Oct.
+// Times are UTC, chosen for 8 PM Central: 01:00Z in October (CDT), 02:00Z from Nov 1 (CST).
 const EVENTS = [
-  { key: "beta", title: "Beta raid night — Onyxia's Lair", kind: "raid", raid: "onyxias-lair", at: "2026-10-09T00:00:00Z", cap: 40, counts: true, desc: "Last beta weekend. Sample event — attendance and loot are placeholders." },
-  { key: "launch", title: "Launch night meetup", kind: "social", raid: null, at: "2026-11-05T01:00:00Z", cap: null, counts: false, desc: "Servers up Nov 4. Meet at the starting zone, sort out groups." },
-  { key: "dungeon", title: "Dungeon night", kind: "dungeon", raid: null, at: "2026-11-07T01:00:00Z", cap: 5, counts: false, desc: null },
-  { key: "ony", title: "Onyxia's Lair", kind: "raid", raid: "onyxias-lair", at: "2026-12-10T01:00:00Z", cap: 40, counts: true, desc: "Unlock night. Fire resist if you have it." },
-  { key: "hyjal", title: "Hyjal Summit", kind: "raid", raid: "hyjal-summit", at: "2026-12-11T01:00:00Z", cap: 20, counts: true, desc: null },
-  { key: "barrow", title: "Barrow Deeps", kind: "raid", raid: "barrow-deeps", at: "2026-12-12T01:00:00Z", cap: 10, counts: true, desc: null },
+  { key: "beta", title: "Beta raid night — Onyxia's Lair", kind: "raid", raid: "onyxias-lair", at: "2026-10-09T01:00:00Z", cap: 40, counts: true, desc: "Last beta weekend. Sample event — attendance and loot are placeholders." },
+  { key: "launch", title: "Launch night meetup", kind: "social", raid: null, at: "2026-11-05T02:00:00Z", cap: null, counts: false, desc: "Servers up Nov 4. Meet at the starting zone, sort out groups." },
+  { key: "dungeon", title: "Dungeon night", kind: "dungeon", raid: null, at: "2026-11-07T02:00:00Z", cap: 5, counts: false, desc: null },
+  { key: "ony", title: "Onyxia's Lair", kind: "raid", raid: "onyxias-lair", at: "2026-12-10T02:00:00Z", cap: 40, counts: true, desc: "Unlock night. Fire resist if you have it." },
+  { key: "hyjal", title: "Hyjal Summit", kind: "raid", raid: "hyjal-summit", at: "2026-12-11T02:00:00Z", cap: 20, counts: true, desc: null },
+  { key: "barrow", title: "Barrow Deeps", kind: "raid", raid: "barrow-deeps", at: "2026-12-12T02:00:00Z", cap: 10, counts: true, desc: null },
 ] as const;
 
 // [character index, status, role?] per event
@@ -102,7 +102,7 @@ export async function seedDemo(q: Sql, log: (m: string) => void = () => {}) {
     await q.query(`insert into attendance (event_id, character_id, status) values ($1, $2, $3)`, [ev.beta, ids[i], status]);
     if (status !== "absent") {
       await q.query(
-        `insert into dkp_ledger (character_id, kind, amount, reason, event_id, created_at) values ($1, 'attendance', 10, $2, $3, '2026-10-09T03:00:00Z')`,
+        `insert into dkp_ledger (character_id, kind, amount, reason, event_id, created_at) values ($1, 'attendance', 10, $2, $3, '2026-10-09T04:00:00Z')`,
         [ids[i], "Attendance: Beta raid night", ev.beta],
       );
     }
@@ -110,17 +110,17 @@ export async function seedDemo(q: Sql, log: (m: string) => void = () => {}) {
 
   const [ony] = await q.query<{ id: string }>(`select id from bosses where raid_id = 'onyxias-lair' order by sort limit 1`);
   if (ony) {
-    await q.query(`insert into boss_kills (boss_id, event_id, killed_at, note) values ($1, $2, '2026-10-09T01:40:00Z', 'Beta kill (sample)')`, [ony.id, ev.beta]);
+    await q.query(`insert into boss_kills (boss_id, event_id, killed_at, note) values ($1, $2, '2026-10-09T02:40:00Z', 'Beta kill (sample)')`, [ony.id, ev.beta]);
   }
   for (const [i, item, cost, note] of BETA_LOOT) {
     const [l] = await q.query<{ id: string }>(
       `insert into loot (character_id, event_id, boss_id, item_name, quality, dkp_cost, council_note, awarded_at)
-       values ($1, $2, $3, $4, 'epic', $5, $6, '2026-10-09T01:45:00Z') returning id`,
+       values ($1, $2, $3, $4, 'epic', $5, $6, '2026-10-09T02:45:00Z') returning id`,
       [ids[i], ev.beta, ony?.id ?? null, item, cost, note],
     );
     if (cost > 0) {
       await q.query(
-        `insert into dkp_ledger (character_id, kind, amount, reason, loot_id, created_at) values ($1, 'loot', $2, $3, $4, '2026-10-09T01:45:00Z')`,
+        `insert into dkp_ledger (character_id, kind, amount, reason, loot_id, created_at) values ($1, 'loot', $2, $3, $4, '2026-10-09T02:45:00Z')`,
         [ids[i], -cost, item, l.id],
       );
     }

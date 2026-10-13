@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { FEATURES } from "@/config/guild";
 import { isWriter } from "@/lib/auth";
 import { getEvent, listSignups } from "@/lib/data/events";
 import { characterOptions } from "@/lib/data/roster";
@@ -52,13 +53,13 @@ export default async function AttendancePage({ params }: PageProps<"/events/[id]
         <PageHeader
           eyebrow="Check-in"
           title="Attendance"
-          sub={`${event.title} · ${fmtDateLong(event.startsAt)}. Here, Late and Bench count toward attendance % and earn DKP.`}
+          sub={`${event.title} · ${fmtDateLong(event.startsAt)}. Here, Late and Bench count toward attendance %${FEATURES.loot ? " and earn DKP" : ""}.`}
         />
       </div>
       {rows.length === 0 ? (
         <p className="card p-4 text-sm text-ink-dim">No characters on the roster yet.</p>
       ) : (
-        <AttendanceForm eventId={id} rows={rows} initial={initial} award={dkp.attendanceAward} />
+        <AttendanceForm eventId={id} rows={rows} initial={initial} award={FEATURES.loot ? dkp.attendanceAward : 0} />
       )}
     </div>
   );

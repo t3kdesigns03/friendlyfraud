@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { CREST_STAR, KIND_LABEL, galaxyWorld } from "@/config/worlds";
-import { QUALITY_COLORS } from "@/config/guild";
+import { FEATURES, QUALITY_COLORS } from "@/config/guild";
 import type { GalaxyData } from "@/lib/galaxy/data";
 import { RavenMark } from "../raven";
 
@@ -15,7 +15,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-/** What you learn when the raven arrives. Guild worlds read live data. */
+/** What you learn when the gryphon lands. Guild worlds read live data. */
 export function WorldPanelBody({ id, data }: { id: string; data: GalaxyData }) {
   if (id === "crest") {
     const c = data.crest;
@@ -176,6 +176,7 @@ export function WorldPanelBody({ id, data }: { id: string; data: GalaxyData }) {
               <p className="text-sm text-ink-dim">Nothing scheduled yet.</p>
             )}
           </Section>
+          {FEATURES.loot && (
           <Section title="Recent loot">
             {loot.length ? (
               <ul className="space-y-1.5 text-sm">
@@ -195,6 +196,7 @@ export function WorldPanelBody({ id, data }: { id: string; data: GalaxyData }) {
               <p className="text-sm text-ink-dim">No loot recorded yet.</p>
             )}
           </Section>
+          )}
           <Link href="/progression" className="btn btn-sm mt-6 min-h-11">
             Full progression
           </Link>

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { FEATURES } from "@/config/guild";
 import { IconCalendar, IconFeather, IconGem, IconHome, IconSkull, IconUsers } from "./icons";
 
-export const NAV = [
+const ALL_NAV = [
   { href: "/", label: "Home", icon: IconHome },
   { href: "/roster", label: "Roster", icon: IconUsers },
   { href: "/events", label: "Calendar", icon: IconCalendar },
@@ -12,6 +13,7 @@ export const NAV = [
   { href: "/progression", label: "Progress", icon: IconSkull },
   { href: "/explore", label: "YERRRP", icon: IconFeather },
 ] as const;
+export const NAV = ALL_NAV.filter((n) => n.href !== "/loot" || FEATURES.loot);
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
@@ -63,7 +65,7 @@ export function MobileNav() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg/90 backdrop-blur-md lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="mx-auto grid max-w-lg grid-cols-6">
+      <ul className="mx-auto grid max-w-lg" style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}>
         {NAV.map((n) => {
           const active = isActive(pathname, n.href);
           const Icon = n.icon;

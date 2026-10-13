@@ -6,7 +6,7 @@ import { Component, useCallback, useEffect, useState } from "react";
 import { sceneStore, useScene } from "@/lib/scene/store";
 import type { SceneData } from "@/lib/scene/types";
 import { HoverLabel, WorldPanel } from "./Overlays";
-import { hasWebGL, isSmallScreen, prefersReducedMotion } from "./perf";
+import { hasWebGL, isSmallScreen, staticOnly } from "./perf";
 
 // The 3D bundle loads only on the homepage, after the content has painted.
 const HomeCanvas = dynamic(() => import("./HomeCanvas"), { ssr: false, loading: () => null });
@@ -40,10 +40,20 @@ export function HomeScene({ data }: { data: SceneData }) {
   }, [data]);
 
   useEffect(() => {
-    if (prefersReducedMotion() || !hasWebGL()) return;
+    if (!hasWebGL()) return;
+    const go = () => setMount(true);
+    if (staticOnly()) {
+      // respect reduced motion, but offer the cinematic (HomeHero shows the button)
+      sceneStore.set("canOptIn", true);
+      const optIn = () => {
+        sceneStore.set("canOptIn", false);
+        go();
+      };
+      window.addEventListener("ff-motion-on", optIn);
+      return () => window.removeEventListener("ff-motion-on", optIn);
+    }
     const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number })
       .requestIdleCallback;
-    const go = () => setMount(true);
     const handle = idle ? idle(go, { timeout: 1200 }) : window.setTimeout(go, 300);
     return () => {
       if (!idle) window.clearTimeout(handle);

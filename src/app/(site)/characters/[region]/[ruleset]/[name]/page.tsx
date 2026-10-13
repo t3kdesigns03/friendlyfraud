@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CLASSES, QUALITY_COLORS, RACES, REGION_LABELS, ROLE_LABELS, RULESET_LABELS, type Region } from "@/config/guild";
+import { CLASSES, FEATURES, QUALITY_COLORS, RACES, REGION_LABELS, ROLE_LABELS, RULESET_LABELS, type Region } from "@/config/guild";
 import { isWriter } from "@/lib/auth";
 import { getCharacter } from "@/lib/data/roster";
 import { characterSignups } from "@/lib/data/events";
@@ -112,14 +112,14 @@ export default async function CharacterPage({ params }: PageProps<"/characters/[
         </div>
       </header>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className={`grid grid-cols-2 gap-3 ${FEATURES.loot ? "sm:grid-cols-4" : "sm:max-w-md"}`}>
         <Stat
           label="Attendance"
           value={c.attendancePct === null ? "—" : `${c.attendancePct}%`}
           hint={c.eligible ? `${c.attended} of ${c.eligible} events` : "No events logged yet"}
         />
-        <Stat label="DKP" value={<span className="text-gold-bright">{c.dkp}</span>} />
-        <Stat label="Loot" value={loot.length} hint={loot[0] ? `last ${fmtShortDate(loot[0].awardedAt)}` : undefined} />
+        {FEATURES.loot && <Stat label="DKP" value={<span className="text-gold-bright">{c.dkp}</span>} />}
+        {FEATURES.loot && <Stat label="Loot" value={loot.length} hint={loot[0] ? `last ${fmtShortDate(loot[0].awardedAt)}` : undefined} />}
         <Stat label="Upcoming" value={signups.filter((s) => s.status === "yes").length} hint="signed up" />
       </div>
 
@@ -170,6 +170,8 @@ export default async function CharacterPage({ params }: PageProps<"/characters/[
           )}
         </section>
 
+        {FEATURES.loot && (
+        <>
         <section>
           <SectionTitle>Loot history</SectionTitle>
           {loot.length === 0 ? (
@@ -218,6 +220,8 @@ export default async function CharacterPage({ params }: PageProps<"/characters/[
             </ul>
           )}
         </section>
+        </>
+        )}
       </div>
 
       <section className="card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">

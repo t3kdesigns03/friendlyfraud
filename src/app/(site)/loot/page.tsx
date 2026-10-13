@@ -1,4 +1,5 @@
-import { ITEM_QUALITIES, QUALITY_COLORS } from "@/config/guild";
+import { notFound } from "next/navigation";
+import { FEATURES, ITEM_QUALITIES, QUALITY_COLORS } from "@/config/guild";
 import { isWriter } from "@/lib/auth";
 import { dkpStandings, listLoot } from "@/lib/data/loot";
 import { characterOptions } from "@/lib/data/roster";
@@ -14,6 +15,7 @@ import { CharName, Empty, PageHeader, SectionTitle } from "@/components/ui";
 export const metadata = { title: "Loot & DKP" };
 
 export default async function LootPage() {
+  if (!FEATURES.loot) notFound();
   const [writer, loot, standings, dkp] = await Promise.all([isWriter(), listLoot(150), dkpStandings(), getDkpSettings()]);
   const [chars, events, bosses] = writer
     ? await Promise.all([characterOptions(), eventOptions(), bossOptions()])

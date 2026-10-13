@@ -9,7 +9,7 @@ import { GUILD_NAME } from "@/config/guild";
 import { CREST_STAR, GALAXY, KIND_LABEL, type WorldKind } from "@/config/worlds";
 import type { GalaxyData } from "@/lib/galaxy/data";
 import { sceneStore } from "@/lib/scene/store";
-import { hasWebGL, isSmallScreen, prefersReducedMotion } from "../scene/perf";
+import { hasWebGL, isSmallScreen, optInToMotion, staticOnly } from "../scene/perf";
 import { WorldPanelBody } from "./Panel";
 import { HOME, flight, g, galaxy, markerEls, useGalaxy } from "./store";
 
@@ -97,9 +97,14 @@ function Marker({ e, touch }: { e: Entry; touch: React.RefObject<boolean> }) {
 }
 
 /** Reduced motion / no WebGL: stars, the crest, and every world as a button. */
-function StaticGalaxy({ open }: { open: (id: string) => void }) {
+function StaticGalaxy({ open, onPlay }: { open: (id: string) => void; onPlay?: () => void }) {
   return (
     <div className="static-stars flex h-full flex-col items-center justify-center gap-6 overflow-y-auto px-5 pt-20 pb-28 text-center">
+      {onPlay && (
+        <button type="button" onClick={onPlay} className="glass flex min-h-11 items-center gap-2 rounded-full px-5 text-sm font-semibold text-void-bright">
+          <span className="size-1.5 rounded-full bg-void-bright shadow-[0_0_8px_var(--void)]" /> Play the cinematic
+        </button>
+      )}
       <Image src="/crest-art.webp" alt={`${GUILD_NAME} crest`} width={1024} height={1024} className="h-auto w-[min(62vw,20rem)]" priority />
       <ul className="flex max-w-xl flex-wrap justify-center gap-2">
         {ENTRIES.map((e) => (
@@ -133,7 +138,7 @@ export function GalaxyExperience({ data }: { data: GalaxyData }) {
   useEffect(() => {
     const id = requestAnimationFrame(() => {
       setSmall(isSmallScreen());
-      setMode(!hasWebGL() || prefersReducedMotion() ? "static" : "3d");
+      setMode(!hasWebGL() || staticOnly() ? "static" : "3d");
     });
     // fresh visit: start at home, overview
     flight.pos.copy(HOME);
@@ -181,7 +186,20 @@ export function GalaxyExperience({ data }: { data: GalaxyData }) {
             <GalaxyCanvas small={small} calm={false} onReady={onReady} onOpenCharacter={onOpenCharacter} />
           </Boundary>
         )}
-        {mode === "static" && <StaticGalaxy open={setStaticOpen} />}
+        {mode === "static" && (
+          <StaticGalaxy
+            open={setStaticOpen}
+            onPlay={
+              hasWebGL()
+                ? () => {
+                    optInToMotion();
+                    setStaticOpen(null);
+                    setMode("3d");
+                  }
+                : undefined
+            }
+          />
+        )}
       </div>
       <div aria-hidden className="sky-vignette pointer-events-none absolute inset-0" />
 
