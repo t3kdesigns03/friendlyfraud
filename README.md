@@ -22,16 +22,34 @@ If `DATABASE_URL` is not set, the app runs an **embedded Postgres (PGlite)** in 
 | --- | --- |
 | `npm run dev` / `build` / `start` | Next.js |
 | `npm run lint` / `typecheck` | ESLint (includes the `@/api` boundary rule) / `tsc` |
-| `npm run db:migrate` | Apply `supabase/migrations/*.sql` to `DATABASE_URL` |
+| `npm run db:migrate` | Apply the schema to `DATABASE_URL` by hand (the app also does it on first boot) |
 | `npm run db:reset-local` | Delete the embedded dev database |
 | `npm run test:probe` | Test the namespace probe end to end against a mock Battle.net |
 
-## Deploy (Netlify + Supabase)
+## Deploy (Netlify)
+
+### Bones (no database yet)
+
+1. In Netlify, choose **Add new site → Import an existing project → GitHub** and pick `t3kdesigns03/friendlyfraud`, branch `main`. Build settings come from `netlify.toml`: `npm run build`, publish `.next`, Node 22.
+2. Under **Site configuration → Environment variables**, set:
+   - `GUILD_PASSCODE` — the shared passcode that unlocks editing.
+   - `SESSION_SECRET` — any long random string, for example `openssl rand -base64 32`.
+3. Deploy.
+
+Without `DATABASE_URL` the site runs on a **temporary** embedded database. Everything works and is clickable, but data resets whenever Netlify recycles the function (usually within minutes to hours of inactivity). The server log says so on boot.
+
+### Real data (Supabase)
 
 1. Create a Supabase project. Copy the **transaction pooler** connection string (port 6543) from Project Settings → Database.
-2. Run `DATABASE_URL=… npm run db:migrate`. You can also paste the two files in `supabase/migrations/` into the SQL editor, in order.
-3. In Netlify, set `DATABASE_URL`, `GUILD_PASSCODE`, `SESSION_SECRET` and `PROBE_SECRET`. Set the `BLIZZARD_*` variables once you have a Battle.net API client. See `.env.example`.
-4. Deploy. Netlify picks up the Next.js runtime automatically, plus the hourly scheduled function in `netlify/functions/probe-namespace.mts`.
+2. Add it in Netlify as `DATABASE_URL` and redeploy.
+
+That's it. On first boot the app applies the schema itself, one instance at a time behind a Postgres advisory lock. Prefer doing it by hand? Run `DATABASE_URL=… npm run db:migrate` and set `DB_AUTO_MIGRATE=0`.
+
+### Optional
+
+- `PROBE_SECRET` turns on the hourly Blizzard namespace probe (`netlify/functions/probe-namespace.mts`).
+- The `BLIZZARD_*` variables turn on live probing once you have a Battle.net API client.
+- See `.env.example` for the full list.
 
 ## The sky (3D)
 

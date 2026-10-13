@@ -8,6 +8,8 @@ const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 const display = Cormorant({ variable: "--font-display-serif", subsets: ["latin"], weight: ["500", "600", "700"] });
 
 export const metadata: Metadata = {
+  // Netlify provides URL (production) / DEPLOY_PRIME_URL (previews) at build and runtime.
+  metadataBase: new URL(process.env.URL ?? process.env.DEPLOY_PRIME_URL ?? "http://localhost:3000"),
   title: { default: GUILD_NAME, template: `%s · ${GUILD_NAME}` },
   description: `${GUILD_NAME} — ${GUILD_TAGLINE}. Roster, raid calendar, loot and progression.`,
 };
