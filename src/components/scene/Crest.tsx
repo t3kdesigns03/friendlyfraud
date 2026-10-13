@@ -177,7 +177,12 @@ export function Crest({ shards, frozen }: { shards: number; frozen: boolean }) {
     // always turn to face the camera as it orbits, plus the sway
     const face = Math.atan2(state.camera.position.x - g.position.x, state.camera.position.z - g.position.z);
     g.rotation.y = THREE.MathUtils.damp(g.rotation.y, face + Math.sin(t * 0.25) * 0.07 + px * 0.1, 3, dt);
-    g.rotation.x = THREE.MathUtils.damp(g.rotation.x, -py * 0.05 + Math.sin(t * 0.18) * 0.02, 3, dt);
+    // and tip toward it, so the art is always seen flat-on (never foreshortened)
+    const dx = state.camera.position.x - g.position.x;
+    const dz = state.camera.position.z - g.position.z;
+    const tilt = -Math.atan2(state.camera.position.y - g.position.y, Math.hypot(dx, dz));
+    g.rotation.order = "YXZ";
+    g.rotation.x = THREE.MathUtils.damp(g.rotation.x, tilt - py * 0.05 + Math.sin(t * 0.18) * 0.02, 3, dt);
     g.position.y = CREST_POS[1] + Math.sin(t * 0.6) * 0.08;
     g.scale.setScalar(1 + lit.current * 0.04);
   });

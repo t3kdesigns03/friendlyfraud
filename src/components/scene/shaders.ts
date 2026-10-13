@@ -207,9 +207,35 @@ export const worldFrag = /* glsl */ `
       float river = smoothstep(0.93, 0.99, ridge);
       albedo = mix(albedo, vec3(0.2, 0.55, 0.62), river);
       emit = uGlow * river * 0.35;
-    } else {
+    } else if (uLook < 4.5) {
       float band = sin(normalize(vObj).y * 9.0 + n * 3.5 + uTime * 0.05) * 0.5 + 0.5;
       albedo = mix(vec3(0.32, 0.28, 0.48), vec3(0.62, 0.6, 0.72), band);
+    } else if (uLook < 5.5) {
+      // ember: charred ground, burning veins, one world-tree glow
+      albedo = mix(vec3(0.05, 0.035, 0.03), vec3(0.2, 0.13, 0.08), n);
+      float vein = smoothstep(0.88, 0.98, ridge);
+      vec3 treeDir = normalize(vec3(0.35, 0.6, 0.7));
+      float tree = pow(max(0.0, dot(normalize(vObj), treeDir)), 60.0);
+      emit = uGlow * vein * (1.1 + 0.4 * sin(uTime * 1.3 + n * 7.0)) + vec3(1.0, 0.85, 0.45) * tree * 3.5;
+    } else if (uLook < 6.5) {
+      // mist: teal water under drifting haze
+      albedo = mix(vec3(0.03, 0.14, 0.15), vec3(0.18, 0.42, 0.42), n);
+      float haze = fbm(o * 2.2 + vec3(uTime * 0.04, 0.0, 0.0));
+      albedo = mix(albedo, vec3(0.62, 0.82, 0.8), smoothstep(0.45, 0.75, haze) * 0.6);
+      emit = uGlow * smoothstep(0.93, 0.99, ridge) * 0.3;
+    } else if (uLook < 7.5) {
+      // gale: gold grass streaked by wind that never stops
+      vec3 p = normalize(vObj);
+      float streak = sin((p.x + p.z) * 22.0 + n * 6.0 - uTime * 1.6) * 0.5 + 0.5;
+      albedo = mix(vec3(0.42, 0.3, 0.1), vec3(0.95, 0.78, 0.38), smoothstep(0.35, 0.95, streak * n * 1.6));
+      emit = uGlow * smoothstep(0.92, 1.0, streak) * 0.18;
+    } else {
+      // anomaly: a dark core wrapped in shimmering, shifting light
+      float swirl = fbm(o * 2.4 + vec3(uTime * 0.25, -uTime * 0.18, uTime * 0.1));
+      albedo = vec3(0.01, 0.0, 0.03);
+      float sh = pow(clamp(swirl * 1.35, 0.0, 1.0), 3.0);
+      emit = mix(uAtmo, uGlow, swirl) * sh * (2.2 + 0.8 * sin(uTime * 2.0 + swirl * 9.0));
+      day = 0.0;
     }
 
     vec3 col = albedo * (0.05 + day * 0.85);

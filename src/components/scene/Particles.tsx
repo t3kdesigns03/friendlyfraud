@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { dustFrag, pointsVert, starFrag } from "./shaders";
-import { VORTEX_RADIUS as R } from "@/lib/scene/layout";
+import { VORTEX_RADIUS } from "@/lib/scene/layout";
 
 type Attribs = {
   position: Float32Array;
@@ -132,7 +132,7 @@ const GOLD = [hex("#ffd27a"), hex("#ffae4a"), hex("#ff8a3a"), hex("#fff1c9")];
 const VOID = [hex("#a774ff"), hex("#7c4dff"), hex("#c9a8ff"), hex("#5b2fc9")];
 const pick = (arr: [number, number, number][]) => arr[(Math.random() * arr.length) | 0];
 
-function buildVortex(n: number): Attribs {
+function buildVortex(n: number, R: number): Attribs {
   const a = alloc(n);
   for (let i = 0; i < n; i++) {
     const arm = i % ARMS;
@@ -171,7 +171,7 @@ function buildCore(n: number): Attribs {
   return a;
 }
 
-function buildDust(n: number): Attribs {
+function buildDust(n: number, R: number): Attribs {
   const a = alloc(n);
   for (let i = 0; i < n; i++) {
     const r0 = 0.5 + Math.pow(Math.random(), 0.9) * (R - 0.5);
@@ -183,15 +183,31 @@ function buildDust(n: number): Attribs {
   return a;
 }
 
-export function Vortex({ count, core, dust, frozen }: { count: number; core: number; dust: number; frozen: boolean }) {
-  const v = useMemo(() => buildVortex(count), [count]);
+export function Vortex({
+  count,
+  core,
+  dust,
+  frozen,
+  radius = VORTEX_RADIUS,
+  size = 1,
+}: {
+  count: number;
+  core: number;
+  dust: number;
+  frozen: boolean;
+  /** disk radius; the galaxy uses a much wider one */
+  radius?: number;
+  /** point size multiplier for larger, farther-away disks */
+  size?: number;
+}) {
+  const v = useMemo(() => buildVortex(count, radius), [count, radius]);
   const c = useMemo(() => buildCore(core), [core]);
-  const d = useMemo(() => buildDust(dust), [dust]);
+  const d = useMemo(() => buildDust(dust, radius), [dust, radius]);
   return (
     <group rotation={[0, 0, 0.06]}>
-      <PointLayer attribs={c} uSize={24} rotSpeed={0.06} shear={0.05} renderOrder={0} frozen={frozen} />
-      <PointLayer attribs={v} uSize={30} rotSpeed={0.055} shear={0.25} twinkle={0.06} renderOrder={1} frozen={frozen} />
-      {dust > 0 && <PointLayer attribs={d} uSize={220} rotSpeed={0.055} shear={0.25} mode="dust" renderOrder={2} frozen={frozen} />}
+      <PointLayer attribs={c} uSize={24 * size} rotSpeed={0.06} shear={0.05} renderOrder={0} frozen={frozen} />
+      <PointLayer attribs={v} uSize={30 * size} rotSpeed={0.055} shear={0.25} twinkle={0.06} renderOrder={1} frozen={frozen} />
+      {dust > 0 && <PointLayer attribs={d} uSize={220 * size} rotSpeed={0.055} shear={0.25} mode="dust" renderOrder={2} frozen={frozen} />}
     </group>
   );
 }

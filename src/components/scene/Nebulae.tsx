@@ -5,7 +5,7 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { nebulaFrag, quadVert } from "./shaders";
 
-type Cloud = {
+export type Cloud = {
   position: [number, number, number];
   rotation: [number, number, number];
   size: [number, number];
@@ -24,8 +24,9 @@ const CLOUDS: Cloud[] = [
   { position: [-6, -12, -28], rotation: [0.2, 0.3, -0.5], size: [48, 36], tint: "#3a1a10", tint2: "#ff7a3d", intensity: 0.06, scale: 3.0, seed: 5.7 },
 ];
 
-function CloudMesh({ cloud, frozen }: { cloud: Cloud; frozen: boolean }) {
+function CloudMesh({ cloud, frozen, billboard }: { cloud: Cloud; frozen: boolean; billboard?: boolean }) {
   const mat = useRef<THREE.ShaderMaterial>(null);
+  const mesh = useRef<THREE.Mesh>(null);
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
@@ -39,9 +40,11 @@ function CloudMesh({ cloud, frozen }: { cloud: Cloud; frozen: boolean }) {
   );
   useFrame((s) => {
     if (!frozen && mat.current) mat.current.uniforms.uTime.value = s.clock.elapsedTime;
+    // a flown-through galaxy has no "front": keep each cloud facing the camera
+    if (billboard && mesh.current) mesh.current.quaternion.copy(s.camera.quaternion);
   });
   return (
-    <mesh position={cloud.position} rotation={cloud.rotation} renderOrder={-3} frustumCulled={false}>
+    <mesh ref={mesh} position={cloud.position} rotation={cloud.rotation} renderOrder={-3} frustumCulled={false}>
       <planeGeometry args={cloud.size} />
       <shaderMaterial
         ref={mat}
@@ -56,11 +59,11 @@ function CloudMesh({ cloud, frozen }: { cloud: Cloud; frozen: boolean }) {
   );
 }
 
-export function Nebulae({ count, frozen }: { count: number; frozen: boolean }) {
+export function Nebulae({ count, frozen, clouds = CLOUDS, billboard }: { count: number; frozen: boolean; clouds?: Cloud[]; billboard?: boolean }) {
   return (
     <>
-      {CLOUDS.slice(0, count).map((c, i) => (
-        <CloudMesh key={i} cloud={c} frozen={frozen} />
+      {clouds.slice(0, count).map((c, i) => (
+        <CloudMesh key={i} cloud={c} frozen={frozen} billboard={billboard} />
       ))}
     </>
   );

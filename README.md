@@ -59,7 +59,11 @@ The crest is the identity. It's rendered from the real artwork everywhere. `npm 
   - The camera fits the whole composition into the hero's "stage" box. On phones that box is a band below the copy and buttons, so the scene never rides up under them or clips at the edges.
   - Scrolling rises the camera over the vortex; the mouse adds parallax.
   - Hovering a raid card, an event row or a crew chip lights its match in the sky. Clicking a world opens its slide-over panel.
-- **`/explore`.** Fullscreen raven flight between the worlds ([`src/components/explore/`](src/components/explore)).
+- **`/explore` (YERRRP).** The guild's galaxy ([`src/components/galaxy/`](src/components/galaxy)). The Crest Star burns at the centre of a gold/violet nebula, and a void-raven flies sweeping Bézier paths to each world.
+  - Every world is one entry in [`src/config/worlds.ts`](src/config/worlds.ts). There are three kinds: **guild** (live raid data), **lore** (atmosphere) and **uncharted** (locked anomalies). Promoting an anomaly is a one-line change.
+  - Worlds have real HTML tap targets (at least 44px). On touch, the first tap labels a world and the second flies to it; with a mouse, hover labels and click flies.
+  - Phones get a compact layout, a 30fps render cap and no bloom.
+  - `node scripts/record.mjs <url> <out.webp> <width> <steps>` records scripted flights from headless Chrome.
 - **Tool pages.** Roster, calendar, loot, progression and settings load **no** 3D: crest palette and glass only, for speed and readability.
 - **Performance.**
   - Particle tiers auto-degrade by screen size and live FPS.

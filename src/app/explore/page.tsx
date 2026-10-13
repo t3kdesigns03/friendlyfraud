@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { getSceneData } from "@/lib/scene/data";
-import { ExploreExperience } from "@/components/explore/ExploreExperience";
+import { getGalaxyData } from "@/lib/galaxy/data";
+import { GalaxyExperience } from "@/components/galaxy/GalaxyExperience";
 
 export const metadata: Metadata = {
   title: "YERRRP",
-  description: "Fly a raven between the launch raids and the guild crest.",
+  description: "Outer space, WoW: Forever style. Fly the void-raven between the guild's worlds.",
 };
 
 export default async function ExplorePage() {
-  const data = await getSceneData();
+  const data = await getGalaxyData();
   return (
     <main>
-      <h1 className="sr-only">YERRRP — fly the Friendly Fraud sky</h1>
-      <ExploreExperience data={data} />
+      <h1 className="sr-only">YERRRP — the Friendly Fraud galaxy</h1>
+      <GalaxyExperience data={data} />
     </main>
   );
 }

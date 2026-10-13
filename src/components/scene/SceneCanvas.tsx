@@ -14,7 +14,7 @@ import { TIERS, detectTier, isSmallScreen, type Tier } from "./perf";
 import { CREST_POS, VORTEX_Y, orbit } from "@/lib/scene/layout";
 
 /** Soft studio reflections for the crest's metal, generated locally (no HDR download). */
-function Env() {
+export function Env() {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
   useEffect(() => {
@@ -32,7 +32,7 @@ function Env() {
 }
 
 /** Two seconds under 40fps → shed a particle tier and the bloom. */
-function AdaptivePerf({ onDrop }: { onDrop: () => void }) {
+export function AdaptivePerf({ onDrop }: { onDrop: () => void }) {
   const a = useRef({ t: 0, frames: 0, bad: 0, warm: 0, done: false });
   useFrame((_, dt) => {
     const s = a.current;
@@ -57,7 +57,7 @@ function AdaptivePerf({ onDrop }: { onDrop: () => void }) {
 }
 
 /** Fires once the first frames are on screen, so the page can fade the scene in. */
-function Ready({ onReady }: { onReady: () => void }) {
+export function Ready({ onReady }: { onReady: () => void }) {
   const n = useRef(0);
   useFrame(() => {
     if (++n.current === 3) onReady();
