@@ -1,17 +1,17 @@
-import { readdir, readFile } from "node:fs/promises";
-import path from "node:path";
+import { MIGRATIONS } from "./migrations.generated";
 
-// Minimal migration runner shared by the app (embedded local DB) and
-// `npm run db:migrate` (Supabase). Applies supabase/migrations/*.sql in order.
+// Migration runner shared by the app (embedded local DB, and Supabase on
+// first boot) and `npm run db:migrate`. The SQL in supabase/migrations is
+// embedded at build time (scripts/gen-migrations.mjs) so serverless hosts
+// don't need the files on disk.
 
 export type Executor = {
   exec(sql: string): Promise<void>;
   query<T>(sql: string, params?: unknown[]): Promise<T[]>;
 };
 
-export const MIGRATIONS_DIR = path.join(process.cwd(), "supabase", "migrations");
-
-export async function runMigrations(db: Executor, log: (msg: string) => void = () => {}) {
+/** Apply any pending migrations. Call inside a single transaction. */
+export async function applyMigrations(db: Executor, log: (msg: string) => void = () => {}) {
   await db.exec(`
     create table if not exists app_migrations (
       name text primary key,
@@ -19,19 +19,18 @@ export async function runMigrations(db: Executor, log: (msg: string) => void = (
     );
     alter table app_migrations enable row level security;
   `);
-  const applied = new Set(
-    (await db.query<{ name: string }>("select name from app_migrations")).map((r) => r.name),
-  );
-  const files = (await readdir(MIGRATIONS_DIR)).filter((f) => f.endsWith(".sql")).sort();
-  for (const file of files) {
-    if (applied.has(file)) continue;
-    const sql = await readFile(path.join(MIGRATIONS_DIR, file), "utf8");
+  const applied = new Set((await db.query<{ name: string }>("select name from app_migrations")).map((r) => r.name));
+  for (const m of MIGRATIONS) {
+    if (applied.has(m.name)) continue;
     try {
-      await db.exec(`begin;\n${sql}\ninsert into app_migrations (name) values ('${file.replace(/'/g, "''")}');\ncommit;`);
+      await db.exec(m.sql);
     } catch (err) {
-      await db.exec("rollback").catch(() => {});
-      throw new Error(`migration ${file} failed: ${(err as Error).message}`);
+      throw new Error(`migration ${m.name} failed: ${(err as Error).message}`);
     }
-    log(`applied ${file}`);
+    await db.query("insert into app_migrations (name) values ($1)", [m.name]);
+    log(`applied ${m.name}`);
   }
 }
+
+/** Arbitrary constant for pg_advisory_xact_lock: one migrator at a time. */
+export const MIGRATION_LOCK = 7270011;

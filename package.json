@@ -12,7 +12,9 @@
     "db:reset-local": "tsx scripts/reset-local.ts",
     "test:probe": "tsx --conditions react-server scripts/test-probe.ts",
     "crest": "node scripts/build-crest.mjs",
-    "db:seed-dev": "tsx --conditions react-server scripts/seed-dev.ts"
+    "db:seed-dev": "tsx --conditions react-server scripts/seed-dev.ts",
+    "predev": "node scripts/gen-migrations.mjs",
+    "prebuild": "node scripts/gen-migrations.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.9",
@@ -39,5 +41,8 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

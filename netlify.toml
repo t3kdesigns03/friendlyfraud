@@ -2,6 +2,9 @@
   command = "npm run build"
   publish = ".next"
 
+[build.environment]
+  NODE_VERSION = "22"
+
 # @netlify/plugin-nextjs is auto-installed by Netlify for Next.js sites.
 # Scheduled namespace probe lives in netlify/functions/probe-namespace.mts.
 [functions]

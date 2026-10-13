@@ -1,5 +1,5 @@
 import "server-only";
-import { runMigrations } from "./migrate";
+import { applyMigrations, MIGRATION_LOCK } from "./migrate";
 
 // One tiny SQL interface over two drivers:
 //  - DATABASE_URL set   → Supabase Postgres via postgres.js (production / Netlify)
@@ -51,6 +51,23 @@ async function connectPostgres(url: string): Promise<Db> {
       return (await s.unsafe(text, params as never[])) as T[];
     },
   });
+  // Bring the schema up to date on first use, one instance at a time. A
+  // transaction-scoped advisory lock works through Supabase's transaction
+  // pooler (session locks don't). Set DB_AUTO_MIGRATE=0 to manage it by hand.
+  if (process.env.DB_AUTO_MIGRATE !== "0") {
+    await sql.begin(async (t) => {
+      await t.unsafe(`select pg_advisory_xact_lock(${MIGRATION_LOCK})`);
+      await applyMigrations(
+        {
+          exec: async (s) => {
+            await t.unsafe(s);
+          },
+          query: async <T,>(s: string, p: unknown[] = []) => (await t.unsafe(s, p as never[])) as unknown as T[],
+        },
+        (m) => console.log(`[db] ${m}`),
+      );
+    });
+  }
   return {
     mode: "supabase",
     ...wrap(sql),
@@ -59,24 +76,30 @@ async function connectPostgres(url: string): Promise<Db> {
 }
 
 async function connectLocal(): Promise<Db> {
-  if (process.env.NODE_ENV === "production" && !process.env.ALLOW_LOCAL_DB) {
-    console.warn(
-      "[db] DATABASE_URL is not set — using the embedded local database. Data will not persist on serverless hosts.",
-    );
-  }
   const { PGlite } = await import("@electric-sql/pglite");
   const { mkdirSync } = await import("node:fs");
-  const dir = process.env.LOCAL_DB_DIR ?? ".data/pglite";
+  const { tmpdir } = await import("node:os");
+  const path = await import("node:path");
+  const hosted = process.env.NODE_ENV === "production";
+  if (hosted) {
+    console.warn(
+      "[db] DATABASE_URL is not set — using a temporary embedded database. Nothing will persist; set DATABASE_URL (Supabase) for real use.",
+    );
+  }
+  // Serverless file systems are read-only except the temp dir.
+  const dir = process.env.LOCAL_DB_DIR ?? (hosted ? path.join(tmpdir(), "ff-pglite") : ".data/pglite");
   mkdirSync(dir, { recursive: true });
   const pg = await PGlite.create(dir);
-  await runMigrations(
-    {
-      exec: async (s) => {
-        await pg.exec(s);
+  await pg.transaction(async (t) =>
+    applyMigrations(
+      {
+        exec: async (s) => {
+          await t.exec(s);
+        },
+        query: async <T,>(s: string, p?: unknown[]) => (await t.query<T>(s, p)).rows,
       },
-      query: async <T,>(s: string, p?: unknown[]) => (await pg.query<T>(s, p)).rows,
-    },
-    (m) => console.log(`[db] ${m}`),
+      (m) => console.log(`[db] ${m}`),
+    ),
   );
   const wrap = (s: Pick<typeof pg, "query">): Sql => ({
     async query<T>(text: string, params: unknown[] = []) {
