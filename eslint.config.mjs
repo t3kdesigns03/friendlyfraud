@@ -16,7 +16,17 @@ const eslintConfig = defineConfig([
       ],
     },
   },
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", ".data/**", ".netlify/**"]),
+  {
+    // A render loop is imperative by design: every frame writes into the
+    // camera, uniforms and pre-allocated objects held in refs, and the sky
+    // uses randomness on purpose. Same carve-out as T3KDESIGNSHOME/BootyBae.
+    files: ["src/components/scene/**", "src/components/explore/**"],
+    rules: {
+      "react-hooks/immutability": "off",
+      "react-hooks/purity": "off",
+    },
+  },
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", ".data/**", ".netlify/**", ".shots/**"]),
 ]);
 
 export default eslintConfig;

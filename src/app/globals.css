@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #09090b;
+  --bg: #07050b;
   --bg-raised: #0f0f12;
   --surface: #131317;
   --surface-2: #1a1a1f;
@@ -15,6 +15,12 @@
   --gold-bright: #f0d28a;
   --gold-dim: #8c7239;
   --gold-wash: rgb(214 178 94 / 0.08);
+
+  /* the crest's void half */
+  --void: #9b6bff;
+  --void-bright: #cdb2ff;
+  --void-dim: #5b3a9e;
+  --void-wash: rgb(155 107 255 / 0.1);
 
   --yes: #6cc58a;
   --maybe: #e2b252;
@@ -35,6 +41,9 @@
   --color-gold: var(--gold);
   --color-gold-bright: var(--gold-bright);
   --color-gold-dim: var(--gold-dim);
+  --color-void: var(--void);
+  --color-void-bright: var(--void-bright);
+  --color-void-dim: var(--void-dim);
   --color-yes: var(--yes);
   --color-maybe: var(--maybe);
   --color-no: var(--no);
@@ -57,16 +66,17 @@ body {
   font-feature-settings: "ss01", "cv11";
 }
 
-/* Faint arcane glow behind the top of every page. */
+/* The crest's split, as light: ember gold from the left, void violet from the
+   right. Static and cheap — tool pages carry the identity without any 3D. */
 body::before {
   content: "";
   position: fixed;
   inset: 0 0 auto 0;
-  height: 520px;
+  height: 620px;
   pointer-events: none;
   background:
-    radial-gradient(60% 70% at 50% -10%, rgb(214 178 94 / 0.09), transparent 70%),
-    radial-gradient(40% 50% at 85% 0%, rgb(120 110 200 / 0.05), transparent 70%);
+    radial-gradient(55% 75% at 8% -12%, rgb(214 178 94 / 0.13), transparent 70%),
+    radial-gradient(55% 75% at 92% -12%, rgb(140 85 255 / 0.15), transparent 70%);
   z-index: -1;
 }
 
@@ -90,9 +100,29 @@ body::before {
   }
 
   .card {
-    background: linear-gradient(180deg, var(--surface) 0%, var(--bg-raised) 100%);
+    background: linear-gradient(180deg, rgb(22 19 30 / 0.92) 0%, rgb(13 11 18 / 0.92) 100%);
     border: 1px solid var(--border);
     border-radius: 14px;
+  }
+
+  .glass {
+    background: rgb(15 11 24 / 0.62);
+    border: 1px solid rgb(205 178 255 / 0.13);
+    -webkit-backdrop-filter: blur(16px) saturate(1.25);
+    backdrop-filter: blur(16px) saturate(1.25);
+  }
+
+  /* hairline that runs gold into violet, like the crest seam */
+  .seam {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim) 30%, var(--gold) 50%, var(--void) 70%, transparent);
+  }
+
+  .text-split {
+    background: linear-gradient(90deg, var(--gold-bright) 0%, var(--gold) 45%, var(--void-bright) 75%, var(--void) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .rule-gold {
@@ -313,4 +343,75 @@ details > summary {
 }
 details > summary::-webkit-details-marker {
   display: none;
+}
+
+/* Homepage sky: keeps type off the brightest particles. */
+.sky-vignette {
+  background:
+    linear-gradient(180deg, rgb(7 5 11 / 0.85) 0%, rgb(7 5 11 / 0) 120px),
+    radial-gradient(150% 115% at 50% 45%, rgb(7 5 11 / 0) 58%, rgb(7 5 11 / 0.45) 86%, rgb(7 5 11 / 0.85) 100%);
+}
+
+.crest-mark {
+  filter: drop-shadow(0 0 10px rgb(214 178 94 / 0.25)) drop-shadow(0 0 14px rgb(140 85 255 / 0.2));
+}
+
+/* Footer credit: the raven flies in and perches on the studio planet. */
+.credit-raven {
+  position: absolute;
+  left: 0;
+  top: 0;
+  offset-distance: 0%;
+  opacity: 0;
+}
+.credit-raven.parked {
+  offset-distance: 100%;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .credit-raven.flying {
+    animation: raven-fly 4.6s cubic-bezier(0.42, 0.05, 0.25, 1) forwards;
+  }
+  @keyframes raven-fly {
+    0% { offset-distance: 0%; opacity: 0; }
+    8% { opacity: 1; }
+    100% { offset-distance: 100%; opacity: 1; }
+  }
+  .credit-raven.flying .raven-wings {
+    transform-box: fill-box;
+    transform-origin: 50% 90%;
+    animation: raven-flap 0.32s ease-in-out infinite alternate;
+  }
+  @keyframes raven-flap {
+    from { transform: scaleY(1); }
+    to { transform: scaleY(-0.35); }
+  }
+  .credit-raven.parked > svg {
+    animation: raven-bob 3.4s ease-in-out infinite;
+  }
+  @keyframes raven-bob {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -3px; }
+  }
+  .t3k-ring {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: t3k-glint 6s ease-in-out infinite;
+  }
+  @keyframes t3k-glint {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 0.95; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .credit-raven {
+    offset-distance: 100%;
+    offset-rotate: 0deg !important;
+    opacity: 1;
+  }
+}
+
+html,
+body {
+  overflow-x: clip;
 }

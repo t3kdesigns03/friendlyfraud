@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:reset-local": "tsx scripts/reset-local.ts",
-    "test:probe": "tsx --conditions react-server scripts/test-probe.ts"
+    "test:probe": "tsx --conditions react-server scripts/test-probe.ts",
+    "crest": "node scripts/build-crest.mjs",
+    "db:seed-dev": "tsx --conditions react-server scripts/seed-dev.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.9",

@@ -1,67 +1,156 @@
 import Link from "next/link";
-import { GUILD_NAME, GUILD_TAGLINE, LAUNCH_DATE, RAID_UNLOCK_DATE } from "@/config/guild";
+import { LAUNCH_DATE, RAID_UNLOCK_DATE, ROLE_LABELS } from "@/config/guild";
 import { isWriter } from "@/lib/auth";
 import { listAnnouncements } from "@/lib/data/announcements";
 import { listEvents } from "@/lib/data/events";
-import { getProgression } from "@/lib/data/progression";
-import { listCharacters } from "@/lib/data/roster";
+import { getSceneData } from "@/lib/scene/data";
 import { createAnnouncementAction } from "@/lib/actions/misc";
-import { daysUntil, fmtDateLong } from "@/lib/time";
+import { daysUntil, fmtShortDate } from "@/lib/time";
 import { AnnouncementCard } from "@/components/announcement-card";
 import { EventRow } from "@/components/event-row";
 import { ActionForm, Submit } from "@/components/forms";
-import { IconArrowRight, IconCross, IconPlus, IconShield, IconSword } from "@/components/icons";
-import { Empty, SectionTitle } from "@/components/ui";
+import { HomeHero } from "@/components/home-hero";
+import { IconArrowRight, IconPlus, ROLE_ICONS } from "@/components/icons";
+import { RavenMark } from "@/components/raven";
+import { HomeScene } from "@/components/scene/HomeScene";
+import { RaidCards, SkyHover } from "@/components/sky-links";
 
-function Countdown({ label, date }: { label: string; date: string }) {
-  const days = daysUntil(date);
+function Heading({ children, aside }: { children: React.ReactNode; aside?: React.ReactNode }) {
   return (
-    <div className="flex items-baseline gap-2 rounded-xl border border-line bg-surface/60 px-4 py-3">
-      <span className="num text-2xl text-gold-bright">{days > 0 ? days : "Live"}</span>
-      <span className="text-xs leading-tight text-ink-dim">
-        {days > 0 ? (days === 1 ? "day until" : "days until") : ""} <span className="text-ink">{label}</span>
-        <br />
-        <span className="text-muted">{fmtDateLong(`${date}T17:00:00Z`)}</span>
-      </span>
+    <div className="mb-3 flex items-baseline justify-between gap-3">
+      <h2 className="display flex items-center gap-2 text-2xl text-ink">
+        <RavenMark size={22} />
+        {children}
+      </h2>
+      {aside && <div className="text-sm text-ink-dim">{aside}</div>}
     </div>
   );
 }
 
 export default async function HomePage() {
-  const [writer, news, upcoming, progression, roster] = await Promise.all([
+  const [writer, news, upcoming, sky] = await Promise.all([
     isWriter(),
     listAnnouncements(10),
     listEvents("upcoming", 4),
-    getProgression(),
-    listCharacters(),
+    getSceneData(),
   ]);
-  const active = roster.filter((c) => c.status !== "inactive");
-  const mains = active.filter((c) => c.isMain);
-  const roleCount = (r: string) => mains.filter((c) => c.role === r).length;
+  const mains = sky.characters.filter((c) => c.isMain);
 
   return (
-    <div className="flex flex-col gap-12">
-      <section className="relative pt-2 sm:pt-6">
-        <div className="eyebrow mb-3">{GUILD_TAGLINE}</div>
-        <h1 className="display text-5xl leading-[0.95] text-ink sm:text-7xl">{GUILD_NAME}</h1>
-        <div className="rule-gold mt-6 max-w-md" />
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Countdown label="launch" date={LAUNCH_DATE} />
-          <Countdown label="first raids" date={RAID_UNLOCK_DATE} />
-        </div>
-      </section>
+    <>
+      <HomeScene data={sky} />
+      <div className="relative z-10 flex flex-col gap-14 sm:gap-20">
+        <HomeHero
+          countdowns={[
+            { label: "launch", days: daysUntil(LAUNCH_DATE), date: fmtShortDate(`${LAUNCH_DATE}T17:00:00Z`) },
+            { label: "first raids", days: daysUntil(RAID_UNLOCK_DATE), date: fmtShortDate(`${RAID_UNLOCK_DATE}T17:00:00Z`) },
+          ]}
+        />
 
-      <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
         <section>
-          <SectionTitle>Guild news</SectionTitle>
+          <Heading
+            aside={
+              <Link href="/progression" className="flex min-h-11 items-center gap-1 hover:text-gold-bright">
+                Progression <IconArrowRight size={14} />
+              </Link>
+            }
+          >
+            The raids
+          </Heading>
+          <RaidCards raids={sky.raids} />
+        </section>
+
+        <div className="grid gap-12 lg:grid-cols-[1fr_1fr]">
+          <section>
+            <Heading
+              aside={
+                <Link href="/events" className="flex min-h-11 items-center gap-1 hover:text-gold-bright">
+                  Calendar <IconArrowRight size={14} />
+                </Link>
+              }
+            >
+              Next up
+            </Heading>
+            <div className="flex flex-col gap-2">
+              {upcoming.length === 0 && (
+                <div className="glass rounded-2xl p-5 text-sm text-ink-dim" data-solid>
+                  Nothing scheduled yet.{" "}
+                  {writer && (
+                    <Link href="/events/new" className="text-gold hover:underline">
+                      Create the first raid night
+                    </Link>
+                  )}
+                </div>
+              )}
+              {upcoming.map((e) => (
+                <SkyHover key={e.id} id={e.raidId ? `raid:${e.raidId}` : null}>
+                  <EventRow e={e} />
+                </SkyHover>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <Heading
+              aside={
+                <Link href="/roster" className="flex min-h-11 items-center gap-1 hover:text-gold-bright">
+                  Roster <IconArrowRight size={14} />
+                </Link>
+              }
+            >
+              The crew
+            </Heading>
+            <div className="glass rounded-2xl p-4" data-solid>
+              {sky.characters.length === 0 ? (
+                <p className="text-sm text-ink-dim">
+                  No one&apos;s on the roster yet.{" "}
+                  {writer && (
+                    <Link href="/roster/new" className="text-gold hover:underline">
+                      Add the first character
+                    </Link>
+                  )}
+                </p>
+              ) : (
+                <ul className="flex flex-wrap gap-2">
+                  {sky.characters.map((c) => {
+                    const I = ROLE_ICONS[c.role];
+                    return (
+                      <li key={c.id}>
+                        <SkyHover id={`char:${c.id}`}>
+                          <Link
+                            href={c.path}
+                            className="flex min-h-11 items-center gap-2 rounded-full border border-line bg-bg/60 px-3.5 text-sm transition-colors hover:border-line-strong"
+                            title={`${c.className} · ${ROLE_LABELS[c.role]}`}
+                          >
+                            <span className="size-1.5 rounded-full" style={{ background: c.color, boxShadow: `0 0 8px ${c.color}` }} />
+                            <span className="font-semibold" style={{ color: c.color }}>
+                              {c.name}
+                            </span>
+                            <I size={13} className="text-muted" />
+                          </Link>
+                        </SkyHover>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+              <p className="mt-3 text-xs text-muted">
+                {mains.length} main{mains.length === 1 ? "" : "s"} · {sky.characters.length - mains.length} alt
+                {sky.characters.length - mains.length === 1 ? "" : "s"} · {sky.characters.filter((c) => c.planned).length} planned
+              </p>
+            </div>
+          </section>
+        </div>
+
+        <section className="max-w-3xl">
+          <Heading>Guild news</Heading>
           <div className="flex flex-col gap-3">
-            {news.length === 0 && <Empty title="Quiet in here">No announcements yet.</Empty>}
             {news.map((a) => (
               <AnnouncementCard key={a.id} a={a} writer={writer} />
             ))}
             {writer && (
-              <details className="card group p-0">
-                <summary className="flex items-center gap-2 px-5 py-4 text-sm font-semibold text-gold">
+              <details className="card p-0" data-solid>
+                <summary className="flex min-h-11 items-center gap-2 px-5 py-3 text-sm font-semibold text-gold">
                   <IconPlus size={16} /> Post an announcement
                 </summary>
                 <ActionForm action={createAnnouncementAction} resetOnSuccess className="flex flex-col gap-3 px-5 pb-5">
@@ -94,104 +183,7 @@ export default async function HomePage() {
             )}
           </div>
         </section>
-
-        <aside className="flex flex-col gap-10">
-          <section>
-            <SectionTitle
-              aside={
-                <Link href="/events" className="flex items-center gap-1 hover:text-gold-bright">
-                  Calendar <IconArrowRight size={14} />
-                </Link>
-              }
-            >
-              Next up
-            </SectionTitle>
-            <div className="flex flex-col gap-2">
-              {upcoming.length === 0 && (
-                <Empty title="Nothing scheduled">
-                  {writer ? (
-                    <Link href="/events/new" className="text-gold hover:underline">
-                      Create the first event
-                    </Link>
-                  ) : (
-                    "Officers haven't posted events yet."
-                  )}
-                </Empty>
-              )}
-              {upcoming.map((e) => (
-                <EventRow key={e.id} e={e} />
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <SectionTitle
-              aside={
-                <Link href="/progression" className="flex items-center gap-1 hover:text-gold-bright">
-                  Details <IconArrowRight size={14} />
-                </Link>
-              }
-            >
-              Progression
-            </SectionTitle>
-            <div className="card divide-y divide-line">
-              {progression.map((r) => {
-                const killed = r.bosses.filter((b) => b.kills > 0).length;
-                const total = r.bosses.length;
-                return (
-                  <div key={r.id} className="px-4 py-3">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="font-semibold text-ink">{r.name}</span>
-                      <span className="num text-sm text-ink-dim">
-                        <span className={killed && killed === total ? "text-gold-bright" : ""}>{killed}</span>/{total || "?"}
-                      </span>
-                    </div>
-                    <div className="mt-2 h-1 overflow-hidden rounded-full bg-surface-2">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-gold-dim to-gold-bright"
-                        style={{ width: total ? `${(killed / total) * 100}%` : "0%" }}
-                      />
-                    </div>
-                    <div className="mt-1.5 text-[11px] text-muted">{r.size}-player</div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          <section>
-            <SectionTitle
-              aside={
-                <Link href="/roster" className="flex items-center gap-1 hover:text-gold-bright">
-                  Roster <IconArrowRight size={14} />
-                </Link>
-              }
-            >
-              The crew
-            </SectionTitle>
-            <div className="card grid grid-cols-3 divide-x divide-line text-center">
-              {(
-                [
-                  ["tank", "Tanks", IconShield],
-                  ["healer", "Healers", IconCross],
-                  ["dps", "DPS", IconSword],
-                ] as const
-              ).map(([r, label, I]) => (
-                <div key={r} className="py-4">
-                  <I size={16} className="mx-auto text-ink-dim" />
-                  <div className="num mt-1 text-2xl text-ink">{roleCount(r)}</div>
-                  <div className="text-[11px] uppercase tracking-widest text-muted">{label}</div>
-                </div>
-              ))}
-            </div>
-            <p className="mt-2 text-xs text-muted">
-              {mains.length} main{mains.length === 1 ? "" : "s"} · {active.length - mains.length} alt
-              {active.length - mains.length === 1 ? "" : "s"} · {active.filter((c) => c.status === "planned").length}{" "}
-              planned
-            </p>
-          </section>
-        </aside>
       </div>
-    </div>
+    </>
   );
 }

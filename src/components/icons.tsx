@@ -128,3 +128,11 @@ export function Sigil({ size = 32, initials }: { size?: number; initials: string
 }
 
 export const ROLE_ICONS = { tank: IconShield, healer: IconCross, dps: IconSword } as const;
+
+export const IconFeather = (p: P) => (
+  <Base {...p}>
+    <path d="M20 4c-7 0-13 5-14.5 13L4 20" />
+    <path d="M20 4c0 6-3 11-9 13.5H6.5" />
+    <path d="M9 13h6.5M12 9h5" />
+  </Base>
+);

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconCalendar, IconGem, IconHome, IconSkull, IconUsers } from "./icons";
+import { IconCalendar, IconFeather, IconGem, IconHome, IconSkull, IconUsers } from "./icons";
 
 export const NAV = [
   { href: "/", label: "Home", icon: IconHome },
@@ -10,6 +10,7 @@ export const NAV = [
   { href: "/events", label: "Calendar", icon: IconCalendar },
   { href: "/loot", label: "Loot", icon: IconGem },
   { href: "/progression", label: "Progress", icon: IconSkull },
+  { href: "/explore", label: "Explore", icon: IconFeather },
 ] as const;
 
 function isActive(pathname: string, href: string) {
@@ -24,6 +25,18 @@ export function DesktopNav() {
     <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
       {NAV.map((n) => {
         const active = isActive(pathname, n.href);
+        if (n.href === "/explore") {
+          return (
+            <Link
+              key={n.href}
+              href={n.href}
+              className="ml-2 flex items-center gap-2 rounded-full border border-void/40 bg-void/10 px-3.5 py-1.5 text-xs font-semibold tracking-[0.16em] text-void-bright uppercase transition-colors hover:border-void hover:text-ink"
+            >
+              <span className="size-1.5 rounded-full bg-void-bright shadow-[0_0_8px_var(--void)]" />
+              Explore
+            </Link>
+          );
+        }
         return (
           <Link
             key={n.href}
@@ -50,7 +63,7 @@ export function MobileNav() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg/90 backdrop-blur-md lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="mx-auto grid max-w-lg grid-cols-5">
+      <ul className="mx-auto grid max-w-lg grid-cols-6">
         {NAV.map((n) => {
           const active = isActive(pathname, n.href);
           const Icon = n.icon;

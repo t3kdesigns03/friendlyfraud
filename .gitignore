@@ -46,3 +46,6 @@ next-env.d.ts
 
 # netlify
 .netlify
+
+# local screenshots
+/.shots/
