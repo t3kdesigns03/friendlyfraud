@@ -1,0 +1,8 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# @netlify/plugin-nextjs is auto-installed by Netlify for Next.js sites.
+# Scheduled namespace probe lives in netlify/functions/probe-namespace.mts.
+[functions]
+  directory = "netlify/functions"
