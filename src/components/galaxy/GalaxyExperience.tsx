@@ -248,7 +248,7 @@ export function GalaxyExperience({ data }: { data: GalaxyData }) {
         data-solid
         className={`glass absolute z-30 overflow-y-auto overscroll-contain transition-transform duration-500 ease-[cubic-bezier(.2,.8,.2,1)] ${
           small || mode === "static"
-            ? `inset-x-0 bottom-0 max-h-[56svh] rounded-t-3xl border-t px-5 pt-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] ${panelId ? "translate-y-0" : "translate-y-full"}`
+            ? `inset-x-0 bottom-0 max-h-[56svh] rounded-t-3xl border-t px-5 pt-4 pb-[calc(7.5rem+env(safe-area-inset-bottom))] ${panelId ? "translate-y-0" : "translate-y-full"}`
             : `top-0 right-0 bottom-0 w-[26rem] border-l px-7 pt-20 pb-28 ${panelId ? "translate-x-0" : "translate-x-full"}`
         }`}
       >
@@ -286,6 +286,18 @@ export function GalaxyExperience({ data }: { data: GalaxyData }) {
             </li>
           ))}
         </ul>
+        {mode === "3d" && (
+          <p className="text-center text-[10px] leading-none text-ink-dim/70">
+            <a
+              href="https://sketchfab.com/3d-models/gryphon-rigged-and-animated-0cb6c35a8500427694747768186854c7"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-8 items-center hover:text-ink"
+            >
+              Gryphon model by DreamNoms · CC BY 4.0 (recoloured)
+            </a>
+          </p>
+        )}
       </nav>
     </div>
   );

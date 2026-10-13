@@ -1,12 +1,12 @@
 "use client";
 
 import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { GALAXY } from "@/config/worlds";
 import { CREST_POS } from "@/lib/scene/layout";
 import { GALAXY_CENTER, bodyOf, orbitRadius, overviewBodies, parkDirection } from "./layout";
-import { Gryphon } from "./Gryphon";
+import { GryphonModel } from "./GryphonModel";
 import { HOME, flight, g, galaxy, markerEls } from "./store";
 
 
@@ -184,7 +184,10 @@ export function MountFlight({ small, calm }: { small: boolean; calm: boolean }) 
         <pointsMaterial size={0.3} map={spark} alphaTest={0.01} vertexColors transparent opacity={0.6} depthWrite={false} blending={THREE.AdditiveBlending} sizeAttenuation toneMapped={false} />
       </points>
       <group ref={body} scale={0.95}>
-        <Gryphon />
+        {/* the models stream in on their own; the galaxy doesn't wait for them */}
+        <Suspense fallback={null}>
+          <GryphonModel />
+        </Suspense>
         <pointLight color="#9b5cff" intensity={5} distance={5} position={[1.2, 1.2, 0]} />
         <pointLight color="#ffc56a" intensity={4} distance={5} position={[-1.2, 1.2, 0.4]} />
       </group>

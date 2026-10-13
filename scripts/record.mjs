@@ -1,6 +1,6 @@
 // Scripted flight through /explore, recorded from headless Chrome.
 //   node scripts/record.mjs <url> <out.webp> <width> <steps-json>
-// steps: [{"tap":"css"}, {"click":"css"}, {"hover":"css"}, {"wait":ms}, {"text":"css"}, {"shot":"file.jpg"}]
+// steps: [{"tap":"css"}, {"click":"css"}, {"hover":"css"}, {"wait":ms}, {"text":"css"}, {"eval":"js expr"}, {"shot":"file.jpg"}]
 // Touch widths (<600) send real touch events; others send mouse events.
 // Frames come from Page.startScreencast and are joined into an animated WebP.
 import { spawn } from "node:child_process";
@@ -107,7 +107,8 @@ for (const s of steps) {
     await send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
     await send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
   }
-  if (s.text) console.log(`  text(${s.text}): ${JSON.stringify((await evaluate(`document.querySelector(${JSON.stringify(s.text)})?.innerText ?? null`))?.slice(0, 600))}`);
+  if (s.eval) console.log(`  eval: ${JSON.stringify(await evaluate(s.eval))}`);
+  if (s.text) console.log(`  text(${s.text}): ${JSON.stringify((await evaluate(`document.querySelector(${JSON.stringify(s.text)})?.innerText ?? null`))?.slice(0, Number(process.env.TEXTMAX ?? 600)))}`);
   if (s.shot) {
     const shot = await send("Page.captureScreenshot", { format: "jpeg", quality: 82 });
     mkdirSync(path.dirname(s.shot), { recursive: true });
@@ -117,7 +118,8 @@ for (const s of steps) {
 recording = false;
 await send("Page.stopScreencast");
 const overflow = await evaluate(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
-console.log(`frames: ${frames.length}, overflowX: ${overflow}px, errors: ${errors.length ? errors.join(" | ") : "none"}`);
+const uniq = [...new Set(errors.map((e) => e.split("\n")[0]))];
+console.log(`frames: ${frames.length}, overflowX: ${overflow}px, errors: ${uniq.length ? `${errors.length} (${uniq.slice(0, 3).join(" | ")})` : "none"}`);
 
 // Join frames into an animated WebP at a steady ~12 fps (scaled to <= 720px wide).
 if (frames.length && out) {

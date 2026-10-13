@@ -59,7 +59,9 @@ The crest is the identity. It's rendered from the real artwork everywhere. `npm 
   - The camera fits the whole composition into the hero's "stage" box. On phones that box is a band below the copy and buttons, so the scene never rides up under them or clips at the edges.
   - Scrolling rises the camera over the vortex; the mouse adds parallax.
   - Hovering a raid card, an event row or a crew chip lights its match in the sky. Clicking a world opens its slide-over panel.
-- **`/explore` (YERRRP).** The guild's galaxy ([`src/components/galaxy/`](src/components/galaxy)). The Crest Star burns at the centre of a gold/violet nebula, and a void-raven flies sweeping Bézier paths to each world.
+- **`/explore` (YERRRP).** The guild's galaxy ([`src/components/galaxy/`](src/components/galaxy)). The Crest Star burns at the centre of a gold/violet nebula, and an armoured knight on a gryphon flies sweeping Bézier paths to each world.
+  - The mount ([`GryphonModel.tsx`](src/components/galaxy/GryphonModel.tsx)) is a licensed rigged gryphon plus a CC0 knight, regraded to the crest's violet and gold (see [Credits](#credits)). The source file's baked animation doesn't line up with its own skin in three.js, so the component poses every joint from its bind matrices and drives the wingbeat, glide, tucked legs and tail itself. The right wing is a mirror of the left.
+  - `public/models/*.glb` are packed from `assets/gryphon` and `assets/knight` with glTF-Transform. `node scripts/pack-models.mjs` strips the lamps, the camera and every animation except the knight's seated idle (gryphon ~500 KB, knight ~400 KB).
   - Every world is one entry in [`src/config/worlds.ts`](src/config/worlds.ts). There are three kinds: **guild** (live raid data), **lore** (atmosphere) and **uncharted** (locked anomalies). Promoting an anomaly is a one-line change.
   - Worlds have real HTML tap targets (at least 44px). On touch, the first tap labels a world and the second flies to it; with a mouse, hover labels and click flies.
   - Phones get a compact layout, a 30fps render cap and no bloom.
@@ -155,4 +157,9 @@ RLS is enabled on every table, with no policies. The Supabase anon key / PostgRE
 
 ## Times
 
-All event times are entered and shown in **guild time** (`GUILD_TIMEZONE`, default `America/New_York`). Server and phone always agree, and DST is handled.
+All event times are entered and shown in **guild time** (`GUILD_TIMEZONE`, `America/Chicago`). Server and phone always agree, and DST is handled.
+
+## Credits
+
+- **Gryphon** (the `/explore` mount). This work is based on ["Gryphon Rigged and Animated"](https://sketchfab.com/3d-models/gryphon-rigged-and-animated-0cb6c35a8500427694747768186854c7) by [DreamNoms](https://sketchfab.com/DreamNoms), licensed under [CC-BY-4.0](http://creativecommons.org/licenses/by/4.0/). It has been recoloured and re-posed.
+- **Knight rider.** [KayKit Character Pack: Adventurers](https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0) by Kay Lousberg, CC0 (credit not required, given anyway). It has been recoloured.
